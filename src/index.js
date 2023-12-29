@@ -4,10 +4,6 @@ const { URL } = require("url");
 const fs = require("fs");
 const path = require("path");
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function findDuplicates(arr) {
   let set = new Set();
   let duplicates = [];
@@ -147,9 +143,9 @@ async function captureScreenshot(page, url, outputFile) {
 
     await page.goto(url);
     await page.setViewport({ width: 1920, height: 1080 });
+    await page.waitForSelector('[data-testid="tweet"]');
 
     const zoom = await getOptimalZoom(page, '[data-testid="tweet"]');
-    console.log(zoom);
 
     await page.evaluate((zoom) => {
       document.body.style.zoom = `${zoom}%`;
@@ -157,8 +153,6 @@ async function captureScreenshot(page, url, outputFile) {
 
     await acceptCookie(page);
     await removeBottomBar(page);
-
-    await sleep(2000);
 
     await page.screenshot({ path: outputFile });
   } catch (error) {
