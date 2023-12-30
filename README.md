@@ -22,3 +22,5 @@ X_PASSWORD = kf77jk
 ```
 
 3. Create an empty folder called "screenshots"
+
+4. Run (``node .``)
