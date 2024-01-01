@@ -1,14 +1,15 @@
-require("dotenv").config();
-const puppeteer = require("puppeteer");
-const { URL } = require("url");
-const fs = require("fs");
-const path = require("path");
+#!/usr/bin/env mode
+import puppeteer from "puppeteer";
+import inquirer from "inquirer";
+import { URL } from "url";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 
-function findDuplicates(arr) {
+function findDuplicates(array) {
   let set = new Set();
   let duplicates = [];
 
-  for (let value of arr) {
+  for (let value of array) {
     if (set.has(value)) {
       duplicates.push(value);
     } else {
@@ -21,7 +22,7 @@ function findDuplicates(arr) {
 
 function getURLsFromJson(path) {
   try {
-    const fileData = fs.readFileSync(path);
+    const fileData = readFileSync(path);
     return JSON.parse(fileData);
   } catch (error) {
     throw new Error(`Error reading JSON file: ${error.message}`);
@@ -136,7 +137,7 @@ async function removeBottomBar(page) {
 
 async function captureScreenshot(page, url, outputFile) {
   try {
-    if (fs.existsSync(outputFile)) {
+    if (existsSync(outputFile)) {
       console.log(`Screenshot for ${url} already exists. Skipping`);
       return;
     }
@@ -145,7 +146,8 @@ async function captureScreenshot(page, url, outputFile) {
     await page.setViewport({ width: 1920, height: 1080 });
     await page.waitForSelector('[data-testid="tweet"]');
 
-    const zoom = await getOptimalZoom(page, '[data-testid="tweet"]');
+    // const zoom = await getOptimalZoom(page, '[data-testid="tweet"]');
+    const zoom = "100";
 
     await page.evaluate((zoom) => {
       document.body.style.zoom = `${zoom}%`;
@@ -160,22 +162,54 @@ async function captureScreenshot(page, url, outputFile) {
   }
 }
 
+async function askParameters() {
+  const questions = [
+    {
+      name: "xUsername",
+      type: "input",
+      message: "Enter X username:",
+    },
+    {
+      name: "xPassword",
+      type: "password",
+      message: "Enter X password:",
+    },
+    {
+      name: "jsonPath",
+      type: "input",
+      message: "URLS.json path:",
+    },
+    {
+      name: "headless",
+      type: "confirm",
+      message: "Headless browser mode:",
+    },
+    {
+      name: "outputPath",
+      type: "input",
+      message: "Screenshots output path:",
+    },
+  ];
+
+  return inquirer.prompt(questions);
+}
+
 async function init() {
   try {
+    const parameters = await askParameters();
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: parameters.headless,
       args: ["--start-maximized"],
     });
     const page = await browser.newPage();
-    const urls = getURLsFromJson("urls.json");
-    const outputDirectory = "./screenshots/";
+    const urls = getURLsFromJson(parameters.jsonPath);
 
     console.log(`Potential duplicates: ${findDuplicates(urls)}`);
 
-    await login(page, process.env.X_USERNAME, process.env.X_PASSWORD);
+    await login(page, parameters.xUsername, parameters.xPassword);
 
     for (const url of urls) {
-      const fileName = path.join(outputDirectory, getValidFileName(url));
+      const fileName = join(parameters.outputPath, getValidFileName(url));
       await captureScreenshot(page, url, fileName);
     }
 
