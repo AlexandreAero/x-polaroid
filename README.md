@@ -6,14 +6,11 @@
 
 ### A simple way of archiving X (formerly Twitter) posts
 
-## Usage
-1. Create a ``.env`` file and put your X username and password, for example:
-```
-X_USERNAME = JohnDoe
-X_PASSWORD = kf77jk
-```
+## Screenhots
+![image](https://github.com/AlexandreAero/x-polaroid/assets/66020831/207ea626-938a-47df-b5f8-1426eafb6e82)
 
-2. Create a ``urls.json`` file and put every X posts links in an array, for example:
+## Usage
+1. Create a JSON file and put every X posts links in an array, for example:
 ```json
 [
   "x.com....",
@@ -21,6 +18,4 @@ X_PASSWORD = kf77jk
 ]
 ```
 
-3. Create an empty folder called "screenshots"
-
-4. Run (``node .``)
+4. Run (``node .``) and follow the prompts
