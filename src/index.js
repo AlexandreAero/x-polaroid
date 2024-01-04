@@ -88,13 +88,13 @@ async function login(page, username, password) {
     await page.goto("https://twitter.com/login");
 
     await page.waitForSelector("input[autocomplete=username]");
-    await page.type("input[autocomplete=username]", username);
+    await page.type("input[autocomplete=username]", username, { delay: 100 });
 
     await page.waitForSelector("[role=button].r-13qz1uu");
     await page.click("[role=button].r-13qz1uu");
 
     await page.waitForSelector("[type=password]");
-    await page.type("[type=password]", password);
+    await page.type("[type=password]", password, { delay: 100 });
 
     await page.waitForSelector("[data-testid*=Login_Button]");
     await page.click("[data-testid*=Login_Button]");
@@ -106,21 +106,6 @@ async function login(page, username, password) {
 }
 
 async function acceptCookie(page) {
-  try {
-    await page.evaluate(() => {
-      const buttons = document.querySelectorAll(
-        '[tabindex="0"][role="button"]'
-      );
-      if (buttons.length > 1) {
-        buttons[1].click();
-      }
-    });
-  } catch (error) {
-    throw new Error(`Error accepting cookies: ${error.message}`);
-  }
-}
-
-async function removeBottomBar(page) {
   try {
     await page.waitForSelector('[data-testid="BottomBar"]');
 
@@ -154,7 +139,6 @@ async function captureScreenshot(page, url, outputFile) {
     }, zoom);
 
     await acceptCookie(page);
-    await removeBottomBar(page);
 
     await page.screenshot({ path: outputFile });
   } catch (error) {
@@ -196,6 +180,8 @@ async function askParameters() {
 
 async function init() {
   try {
+    console.clear();
+
     const parameters = await askParameters();
     const browser = await puppeteer.launch({
       headless: parameters.headless,
